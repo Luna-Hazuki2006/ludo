@@ -1,12 +1,16 @@
 var tabla = document.getElementById('tabla');
 var casillas = document.getElementsByTagName('td')
 var centro = document.getElementById('centro')
+var dado = document.getElementById('dado')
 
 let piezas = {
     '🟨': 'amarillo', 
     '🟥': 'rojo', 
     '🟩': 'verde', 
     '🟦': 'azul'}
+
+let caras = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣']
+
 
 function colorear() {
     let lineas = tabla?.getElementsByTagName('tr');
@@ -110,45 +114,74 @@ function movimiento(celda : HTMLTableCellElement, lugar : string) {
     }
 }
 
-function llegar(inicio : HTMLTableCellElement, final : Element) {
+function llegar(inicio : Element, final : Element) {
     if (!final) return
-    if (final.tagName == 'TH') final.textContent += inicio.innerText
-    else final.textContent = inicio.innerText
-    inicio.innerText = ''
+    if (final.textContent == null) final.textContent = ''
+    if (final.tagName == 'TH') final.textContent += inicio.textContent
+    else final.textContent = inicio.textContent
+    inicio.textContent = ''
+}
+
+function buscar(celda : HTMLTableCellElement, veces : number) {    
+    if (veces == 0) {
+        console.log('no lo seeeee');
+        console.log(celda);
+        
+        return celda
+    }
+    let lugar = celda.classList.item(celda.classList.length - 1)
+    if (!lugar) return celda
+    switch (lugar.length) {
+        case 2:
+            var actual = movimiento(celda, lugar)
+            break;
+        case 4: 
+            if (lugar.substring(0, 2) != celda.innerText) return celda
+            actual = movimiento(celda, lugar.substring(2, 4))
+            break
+        case 6: 
+            if (lugar.substring(0, 2) == celda.innerText) actual = movimiento(celda, lugar.substring(2, 4))
+            else actual = movimiento(celda, lugar.substring(4))
+            break
+        default:
+            actual = celda
+            break;
+    }
+    if (!actual) return celda
+    return buscar(actual as HTMLTableCellElement, veces - 1)
+}
+
+function lanzar() {
+    dado?.addEventListener('click', (evento : MouseEvent) => {
+        if (!dado) return
+        dado.innerText = caras[Math.floor(Math.random() * caras.length)]
+    })
 }
 
 function mover() {
     for (const esto of casillas[Symbol.iterator]()) {
         esto.addEventListener('click', (evento : MouseEvent) => {
-            if (esto.innerText == '') return
-            console.log(esto);
-            let lugar = esto.classList.item(esto.classList.length - 1)
-            console.log(lugar);
-            console.log(lugar?.length);
-            switch (lugar?.length) {
-                case 2:
-                    var actual = movimiento(esto, lugar)
-                    break;
-                case 4: 
-                    if (lugar.substring(0, 2) != esto.innerText) return
-                    actual = movimiento(esto, lugar.substring(2, 4))
-                    break
-                case 6: 
-                    if (lugar.substring(0, 2) == esto.innerText) {
-                        actual = movimiento(esto, lugar.substring(2, 4))
-                    } else {
-                        actual = movimiento(esto, lugar.substring(4))
-                    }
-                    break
-                default:
-                    break;
-            }
-            if (!actual) return
-            llegar(esto, actual)
+            if (!dado) return
+            if (esto.innerText == '' || dado.innerText == '🎲') return
+            let veces = Number(dado?.innerText.split('')[0])
+            console.log(veces);
+            
+            let final = buscar(esto, veces)
+            console.log(final);
+            
+            dado.innerText = '🎲'
+            console.log('pasó');
+            
+            if (!final) return
+            console.log('perfecto');
+            
+            llegar(esto, final)
+
         })
     }
 }
 
 colorear();
 flechear()
+lanzar()
 mover()

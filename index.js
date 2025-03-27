@@ -2,12 +2,14 @@
 var tabla = document.getElementById('tabla');
 var casillas = document.getElementsByTagName('td');
 var centro = document.getElementById('centro');
+var dado = document.getElementById('dado');
 let piezas = {
     '🟨': 'amarillo',
     '🟥': 'rojo',
     '🟩': 'verde',
     '🟦': 'azul'
 };
+let caras = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣'];
 function colorear() {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     let lineas = tabla === null || tabla === void 0 ? void 0 : tabla.getElementsByTagName('tr');
@@ -155,47 +157,74 @@ function movimiento(celda, lugar) {
 function llegar(inicio, final) {
     if (!final)
         return;
+    if (final.textContent == null)
+        final.textContent = '';
     if (final.tagName == 'TH')
-        final.textContent += inicio.innerText;
+        final.textContent += inicio.textContent;
     else
-        final.textContent = inicio.innerText;
-    inicio.innerText = '';
+        final.textContent = inicio.textContent;
+    inicio.textContent = '';
+}
+function buscar(celda, veces) {
+    if (veces == 0) {
+        console.log('no lo seeeee');
+        console.log(celda);
+        return celda;
+    }
+    let lugar = celda.classList.item(celda.classList.length - 1);
+    if (!lugar)
+        return celda;
+    switch (lugar.length) {
+        case 2:
+            var actual = movimiento(celda, lugar);
+            break;
+        case 4:
+            if (lugar.substring(0, 2) != celda.innerText)
+                return celda;
+            actual = movimiento(celda, lugar.substring(2, 4));
+            break;
+        case 6:
+            if (lugar.substring(0, 2) == celda.innerText)
+                actual = movimiento(celda, lugar.substring(2, 4));
+            else
+                actual = movimiento(celda, lugar.substring(4));
+            break;
+        default:
+            actual = celda;
+            break;
+    }
+    if (!actual)
+        return celda;
+    return buscar(actual, veces - 1);
+}
+function lanzar() {
+    dado === null || dado === void 0 ? void 0 : dado.addEventListener('click', (evento) => {
+        if (!dado)
+            return;
+        dado.innerText = caras[Math.floor(Math.random() * caras.length)];
+    });
 }
 function mover() {
     for (const esto of casillas[Symbol.iterator]()) {
         esto.addEventListener('click', (evento) => {
-            if (esto.innerText == '')
+            if (!dado)
                 return;
-            console.log(esto);
-            let lugar = esto.classList.item(esto.classList.length - 1);
-            console.log(lugar);
-            console.log(lugar === null || lugar === void 0 ? void 0 : lugar.length);
-            switch (lugar === null || lugar === void 0 ? void 0 : lugar.length) {
-                case 2:
-                    var actual = movimiento(esto, lugar);
-                    break;
-                case 4:
-                    if (lugar.substring(0, 2) != esto.innerText)
-                        return;
-                    actual = movimiento(esto, lugar.substring(2, 4));
-                    break;
-                case 6:
-                    if (lugar.substring(0, 2) == esto.innerText) {
-                        actual = movimiento(esto, lugar.substring(2, 4));
-                    }
-                    else {
-                        actual = movimiento(esto, lugar.substring(4));
-                    }
-                    break;
-                default:
-                    break;
-            }
-            if (!actual)
+            if (esto.innerText == '' || dado.innerText == '🎲')
                 return;
-            llegar(esto, actual);
+            let veces = Number(dado === null || dado === void 0 ? void 0 : dado.innerText.split('')[0]);
+            console.log(veces);
+            let final = buscar(esto, veces);
+            console.log(final);
+            dado.innerText = '🎲';
+            console.log('pasó');
+            if (!final)
+                return;
+            console.log('perfecto');
+            llegar(esto, final);
         });
     }
 }
 colorear();
 flechear();
+lanzar();
 mover();
