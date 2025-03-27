@@ -37,237 +37,118 @@ function colorear() {
     }
 }
 
+function flechear() {
+    let lista = tabla?.getElementsByTagName('tr')
+    if (!lista) return
+    for (const fila of lista?.[Symbol.iterator]()) {
+        let celdas = fila.getElementsByTagName('td')
+        if (celdas.length == 3) {
+            for (let i = 0; i < celdas.length; i++) {
+                switch (i) {
+                    case 0: 
+                        if (fila.rowIndex == 0) celdas.item(i)?.classList.add('➡️')
+                        else if (fila.rowIndex == 9) celdas.item(i)?.classList.add('↖️')
+                        else celdas.item(i)?.classList.add('⬆️')
+                        break;
+                    case 1: 
+                        if (fila.rowIndex == 0) celdas.item(i)?.classList.add('🟥⬇️➡️')
+                        else if (fila.rowIndex == 5 || fila.rowIndex == 9) celdas.item(i)?.classList.add('⏺️')
+                        else if (fila.rowIndex == lista.length - 1) celdas.item(i)?.classList.add('🟨⬆️⬅️')
+                        else if (fila.rowIndex < 5) celdas.item(i)?.classList.add('🟥⬇️')
+                        else if (fila.rowIndex > 9) celdas.item(i)?.classList.add('🟨⬆️')
+                        break
+                    case 2: 
+                        if (fila.rowIndex == lista.length - 1) celdas.item(i)?.classList.add('⬅️')
+                        else if (fila.rowIndex == 5) celdas.item(i)?.classList.add('↘️')
+                        else celdas.item(i)?.classList.add('⬇️')
+                        break
+                    default:
+                        break;
+                }
+            }
+        } else if (celdas.length == 12) {
+            for (const celda of celdas[Symbol.iterator]()) {
+                if (fila.getElementsByClassName(piezas['🟩']).length == 1) {
+                    switch (celda.cellIndex) {
+                        case (celdas.length / 2) - 1: celda.classList.add('↗️'); break
+                        case celdas.length: celda.classList.add('⬇️'); break
+                        default: celda.classList.add('➡️'); break;
+                    }
+                } else if (fila.getElementsByClassName(piezas['🟦']).length == 1) {
+                    switch (celda.cellIndex) {
+                        case 0: celda.classList.add('⬆️'); break;
+                        case celdas.length / 2: celda.classList.add('↙️'); break
+                        default: celda.classList.add('⬅️'); break;
+                    }
+                } else {
+                    if (celda.cellIndex == 0) celda.classList.add('🟩➡️⬆️')
+                    else if (celda.cellIndex == celdas.length - 1) celda.classList.add('🟦⬅️⬇️')
+                    else if (celda.cellIndex == (celdas.length / 2) - 1 || celda.cellIndex == celdas.length / 2) celda.classList.add('⏺️')
+                    else if (celda.cellIndex < (celdas.length / 2) - 1) celda.classList.add('🟩➡️')
+                    else if (celda.cellIndex > celdas.length / 2) celda.classList.add('🟦⬅️')
+                }
+            }
+        }
+    }
+}
+
+function movimiento(celda : HTMLTableCellElement, lugar : string) {
+    switch (lugar) {
+        case '⬅️': return celda.previousElementSibling
+        case '➡️': return celda.nextElementSibling
+        case '⬇️': return celda.parentElement?.nextElementSibling?.getElementsByTagName('td').item(celda.cellIndex 
+            - (celda.parentElement.firstElementChild?.tagName == 'TH' || 
+                celda.parentElement.children.item(celda.parentElement.children.length / 2)?.tagName == 'TH' 
+                ? 1 : 0))
+        case '⬆️': return celda.parentElement?.previousElementSibling?.getElementsByTagName('td').item(celda.cellIndex)
+        case '↙️': return celda.parentElement?.nextElementSibling?.getElementsByTagName('td').item(2)
+        case '↗️': return celda.parentElement?.previousElementSibling?.getElementsByTagName('td').item(0)
+        case '↘️': return celda.parentElement?.nextElementSibling?.getElementsByTagName('td').item(6)
+        case '↖️': return celda.parentElement?.previousElementSibling?.getElementsByTagName('td').item(5)
+        case '⏺️': return centro
+        default: return centro
+    }
+}
+
+function llegar(inicio : HTMLTableCellElement, final : Element) {
+    if (!final) return
+    if (final.tagName == 'TH') final.textContent += inicio.innerText
+    else final.textContent = inicio.innerText
+    inicio.innerText = ''
+}
+
 function mover() {
     for (const esto of casillas[Symbol.iterator]()) {
         esto.addEventListener('click', (evento : MouseEvent) => {
-            console.log(esto.parentElement);
-            if (!Object.keys(piezas).includes(esto.innerText)) return
-            else {
-                let numero = esto.cellIndex
-                let cantidad = esto.parentElement?.childElementCount
-                if (!cantidad) return
-                if (cantidad == 13) {
-                    if (numero == 5) {
-                        let siguiente = esto.parentElement?.previousElementSibling
-                        if (!siguiente) return
-                        let nuevo = siguiente.children.item(0)
-                        if (!nuevo) return
-                        let pasado = nuevo.textContent
-                        nuevo.textContent = esto.innerText
-                        esto.innerText = '' + pasado
-                    } else if (numero == 12) {
-                        let siguiente = esto.parentElement?.nextElementSibling
-                        if (!siguiente) return
-                        let nuevo = siguiente.children.item(11)
-                        if (!nuevo) return
-                        let pasado = nuevo.textContent
-                        nuevo.textContent = esto.innerText
-                        esto.innerText = '' + pasado
+            if (esto.innerText == '') return
+            console.log(esto);
+            let lugar = esto.classList.item(esto.classList.length - 1)
+            console.log(lugar);
+            console.log(lugar?.length);
+            switch (lugar?.length) {
+                case 2:
+                    var actual = movimiento(esto, lugar)
+                    break;
+                case 4: 
+                    if (lugar.substring(0, 2) != esto.innerText) return
+                    actual = movimiento(esto, lugar.substring(2, 4))
+                    break
+                case 6: 
+                    if (lugar.substring(0, 2) == esto.innerText) {
+                        actual = movimiento(esto, lugar.substring(2, 4))
                     } else {
-                        let nuevo = esto.parentElement?.children.item(numero + 1)
-                        if (!nuevo) return
-                        let pasado = nuevo.textContent
-                        nuevo.textContent = esto.innerText
-                        esto.innerText = '' + pasado
+                        actual = movimiento(esto, lugar.substring(4))
                     }
-                } else if (cantidad == 12) {
-                    console.log('DOCEEEEEEEEEE');
-                    
-                    if (numero == 0) {
-                        let siguiente = esto.parentElement?.children.item(1)
-                        let prueba = siguiente?.parentElement?.getElementsByClassName(piezas['🟩']).length
-                        if (!siguiente) return
-                        if (prueba == undefined) return
-                        console.log(prueba == 0);
-                        console.log(prueba != 0);
-                        console.log(esto.innerText != '🟩');
-                        
-                        if ((esto.innerText == '🟩' && siguiente.className == piezas[esto.innerText]) 
-                            // || (prueba != 0 && esto.innerText != '🟩')
-                        ) {
-                            
-                            let pasado = siguiente.textContent
-                            siguiente.textContent = esto.innerText
-                            esto.innerText = '' + pasado
-                        } else if (prueba == 0 || (prueba > 0 && esto.innerText != '🟩')) {
-                            let nuevo = esto.parentElement?.previousElementSibling?.children.item(0)
-                            if (!nuevo) return
-                            let pasado = nuevo.textContent
-                            nuevo.textContent = esto.innerText
-                            esto.innerText = '' + pasado
-                        }
-                    } else if (numero == 11) {
-                        let siguiente = esto.parentElement?.children.item(10)
-                        let prueba = siguiente?.parentElement?.getElementsByClassName(piezas['🟦']).length
-                        if (!siguiente) return
-                        if (!prueba) return
-                        if ((esto.innerText == '🟦' && siguiente.className == piezas[esto.innerText]) 
-                            || (prueba == 1)) {
-                            let pasado = siguiente.textContent
-                            siguiente.textContent = esto.innerText
-                            esto.innerText = '' + pasado
-                        } else {
-                            let nuevo = esto.parentElement?.nextElementSibling?.children.item(11)
-                            if (!nuevo) return
-                            let pasado = nuevo.textContent
-                            nuevo.textContent = esto.innerText
-                            esto.innerText = '' + pasado
-                        }
-                    } else {
-                        if ((numero == 5 || numero == 6) && esto.className != '') {
-                            if (!centro) return
-                            centro.innerText += esto.innerText
-                            esto.innerText = ''
-                        } else if (numero == 6 && esto.className == '') {
-                            let siguiente = esto.parentElement?.nextElementSibling?.children.item(3)
-                            if (!siguiente) return
-                            let info = siguiente.textContent
-                            siguiente.textContent = esto.innerText
-                            esto.innerText = '' + info
-                        } else if (numero <= 5 && piezas['🟩'] == esto.className) {
-                            console.log('por aquí');
-                            
-                            let siguiente = esto.parentElement?.children.item(numero + 1)
-                            if (!siguiente) return
-                            let pasado = siguiente.textContent
-                            siguiente.textContent = esto.innerText
-                            esto.innerText = '' + pasado
-                        } else 
-                        // if ((numero >= 7 && piezas['🟦'] == esto.className) || numero >= 7) 
-                            {
-                            console.log('por acá');
-                            
-                            let siguiente = esto.parentElement?.children.item(numero - 1)
-                            if (!siguiente) return
-                            let pasado = siguiente.textContent
-                            siguiente.textContent = esto.innerText
-                            esto.innerText = '' + pasado
-                        }
-                    }
-                } else if (cantidad == 3) {
-                    console.log('los tresss');
-                    
-                    let actual = esto.parentElement
-                    if (actual == undefined) return
-                    if (numero == 0 || (numero == 1 && 
-                        actual.getElementsByClassName(piezas['🟨']).length != 0 && esto.innerText == '🟨')) {
-                        console.log('amarilllo');
-                        
-                        let siguiente = esto.parentElement?.previousElementSibling?.children.item(numero)
-                        if (!siguiente) return
-                        if (siguiente.tagName == 'TD' && siguiente) {
-                            let info = siguiente.textContent
-                            siguiente.textContent = esto.innerText
-                            esto.innerText = '' + info
-                        } else {
-                            let nuevo = esto.parentElement?.previousElementSibling?.children.item(numero + 1)
-                            if (!nuevo) return
-                            let info = nuevo.textContent
-                            nuevo.textContent = esto.innerText
-                            esto.innerText = '' + info
-                        }
-                        
-                    } else if ((numero == 2 && (actual.getElementsByClassName(piezas['🟥']).length != 0 || 
-                        actual.getElementsByClassName(piezas['🟨']).length != 0)) || (numero == 1 && 
-                        actual.getElementsByClassName(piezas['🟥']).length != 0 && esto.innerText == '🟥')) {
-                        console.log('rojoooooooo');
-                        
-                        let siguiente = esto.parentElement?.nextElementSibling?.children.item(numero)
-                        if (!siguiente) return
-                        if (siguiente.tagName == 'TD' && siguiente) {
-                            let info = siguiente.textContent
-                            siguiente.textContent = esto.innerText
-                            esto.innerText = '' + info
-                        } else {
-                            let nuevo = esto.parentElement?.nextElementSibling?.children.item(numero + 1)
-                            if (!nuevo) return
-                            let info = nuevo.textContent
-                            nuevo.textContent = esto.innerText
-                            esto.innerText = '' + info
-                        }
-                    } else if (actual.getElementsByClassName(piezas["🟨"]).length == 0 && 
-                        (numero == 1 || numero == 2)) {
-                        console.log('nadaaaaaaaaaa');
-                        switch (numero) {
-                            case 1:
-                                if (esto.innerText == '🟨') {
-                                    let siguiente = actual.previousElementSibling?.children.item(1)
-                                    if (!siguiente) return
-                                    let info = siguiente.textContent
-                                    siguiente.textContent = esto.innerText
-                                    esto.innerText = '' + info
-                                } else {
-                                    let siguiente = esto.previousElementSibling
-                                    if (!siguiente) return
-                                    let info = siguiente.textContent
-                                    siguiente.textContent = esto.innerText
-                                    esto.innerText = '' + info
-                                }
-                                break;
-                            case 2:
-                                let siguiente = esto.previousElementSibling
-                                if (!siguiente) return
-                                let info = siguiente.textContent
-                                siguiente.textContent = esto.innerText
-                                esto.innerText = '' + info
-                                break
-                            default:
-                                break;
-                        }
-                    }
-                } else if (cantidad == 5) {
-                    switch (numero) {
-                        case 1:
-                            if (esto.parentElement?.getElementsByClassName(piezas["🟨"]).length != 0) {
-                                let siguiente = esto.parentElement?.previousElementSibling?.children.item(5)
-                                if (!siguiente) return
-                                let info = siguiente.textContent
-                                siguiente.textContent = esto.innerText
-                                esto.innerText = '' + info
-                            } else {
-                                let siguiente = esto.nextElementSibling
-                                if (!siguiente) return
-                                let info = siguiente.textContent
-                                siguiente.textContent = esto.innerText
-                                esto.innerText = '' + info
-                            }
-                            break;
-                        case 2: 
-                            if (esto.parentElement?.getElementsByClassName(piezas["🟨"]).length != 0) {
-                                if (!centro) return
-                                centro.innerText = esto.innerText
-                                esto.innerText = ''
-                            } else {
-                                let siguiente = esto.nextElementSibling
-                                if (!siguiente) return
-                                let info = siguiente.textContent
-                                siguiente.textContent = esto.innerText
-                                esto.innerText = '' + info
-                            }
-                            break
-                        case 3: 
-                            if (esto.parentElement?.getElementsByClassName(piezas["🟨"]).length != 0) {
-                                let siguiente = esto.parentElement?.nextElementSibling?.children.item(5)
-                                if (!siguiente) return
-                                let info = siguiente.textContent
-                                siguiente.textContent = esto.innerText
-                                esto.innerText = '' + info
-                            } else {
-                                let siguiente = esto.parentElement.nextElementSibling?.children.item(2)
-                                if (!siguiente) return
-                                let info = siguiente.textContent
-                                siguiente.textContent = esto.innerText
-                                esto.innerText = '' + info
-                            }
-                            break
-                        default:
-                            break;
-                    }
-                }
+                    break
+                default:
+                    break;
             }
+            if (!actual) return
+            llegar(esto, actual)
         })
     }
 }
 
 colorear();
+flechear()
 mover()
