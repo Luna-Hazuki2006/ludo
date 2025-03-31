@@ -179,6 +179,7 @@ function llegar(inicio, final) {
     }
 }
 function buscar(celda, color, veces) {
+    var _a, _b;
     if (veces == 0) {
         console.log('no lo seeeee');
         console.log(celda);
@@ -208,6 +209,8 @@ function buscar(celda, color, veces) {
     }
     if (!actual)
         return celda;
+    if (!((_a = actual.textContent) === null || _a === void 0 ? void 0 : _a.includes(color)) && ((_b = actual.textContent) === null || _b === void 0 ? void 0 : _b.length) > 2)
+        return false;
     return buscar(actual, color, veces - 1);
 }
 function lanzar() {
@@ -227,11 +230,11 @@ function mover() {
             let veces = Number(dado === null || dado === void 0 ? void 0 : dado.innerText.split('')[0]);
             console.log(veces);
             let final = buscar(esto, esto.innerText, veces);
+            if (!final)
+                return;
             console.log(final);
             dado.innerText = '🎲';
             console.log('pasó');
-            if (!final)
-                return;
             console.log('perfecto');
             llegar(esto, final);
         });

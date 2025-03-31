@@ -138,7 +138,6 @@ function buscar(celda : HTMLTableCellElement, color : string, veces : number) {
     if (veces == 0) {
         console.log('no lo seeeee');
         console.log(celda);
-        
         return celda
     }
     let lugar = celda.classList.item(celda.classList.length - 1)
@@ -160,6 +159,7 @@ function buscar(celda : HTMLTableCellElement, color : string, veces : number) {
             break;
     }
     if (!actual) return celda
+    if (!actual.textContent?.includes(color) && actual.textContent?.length as number > 2) return false
     return buscar(actual as HTMLTableCellElement, color, veces - 1)
 }
 
@@ -178,10 +178,10 @@ function mover() {
             let veces = Number(dado?.innerText.split('')[0])
             console.log(veces);
             let final = buscar(esto, esto.innerText, veces)
+            if (!final) return
             console.log(final);
             dado.innerText = '🎲'
             console.log('pasó');
-            if (!final) return
             console.log('perfecto');
             llegar(esto, final)
 
