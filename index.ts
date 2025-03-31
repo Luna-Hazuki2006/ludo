@@ -117,12 +117,24 @@ function movimiento(celda : HTMLTableCellElement, lugar : string) {
 function llegar(inicio : Element, final : Element) {
     if (!final) return
     if (final.textContent == null) final.textContent = ''
-    if (final.tagName == 'TH') final.textContent += inicio.textContent
-    else final.textContent = inicio.textContent
-    inicio.textContent = ''
+    if (final.tagName == 'TH' && final.id == 'centro') final.textContent += inicio.textContent
+    else {
+        if (final.textContent.includes(inicio.textContent as string) || final.textContent == '') {
+            final.textContent += inicio.textContent?.slice(inicio.textContent.length - 2, inicio.textContent.length)
+            inicio.textContent = inicio.textContent?.slice(0, inicio.textContent.length - 2) as string
+        } else if (final.textContent.length == 2 && (final.textContent == '🟥' || final.textContent == '🟦' 
+            || final.textContent == '🟨' || final.textContent == '🟩')) {
+            let casilla = document.getElementById(piezas[final.textContent])
+            if (!casilla) return
+            casilla.innerText += final.textContent
+            final.textContent = inicio.textContent?.slice(inicio.textContent.length - 2, inicio.textContent.length) as string
+            inicio.textContent = inicio.textContent?.slice(0, inicio.textContent.length - 2) as string
+        }
+    }
+    
 }
 
-function buscar(celda : HTMLTableCellElement, veces : number) {    
+function buscar(celda : HTMLTableCellElement, color : string, veces : number) {    
     if (veces == 0) {
         console.log('no lo seeeee');
         console.log(celda);
@@ -136,11 +148,11 @@ function buscar(celda : HTMLTableCellElement, veces : number) {
             var actual = movimiento(celda, lugar)
             break;
         case 4: 
-            if (lugar.substring(0, 2) != celda.innerText) return celda
+            if (lugar.substring(0, 2) != color) return celda
             actual = movimiento(celda, lugar.substring(2, 4))
             break
         case 6: 
-            if (lugar.substring(0, 2) == celda.innerText) actual = movimiento(celda, lugar.substring(2, 4))
+            if (lugar.substring(0, 2) == color) actual = movimiento(celda, lugar.substring(2, 4))
             else actual = movimiento(celda, lugar.substring(4))
             break
         default:
@@ -148,7 +160,7 @@ function buscar(celda : HTMLTableCellElement, veces : number) {
             break;
     }
     if (!actual) return celda
-    return buscar(actual as HTMLTableCellElement, veces - 1)
+    return buscar(actual as HTMLTableCellElement, color, veces - 1)
 }
 
 function lanzar() {
@@ -165,18 +177,32 @@ function mover() {
             if (esto.innerText == '' || dado.innerText == '🎲') return
             let veces = Number(dado?.innerText.split('')[0])
             console.log(veces);
-            
-            let final = buscar(esto, veces)
+            let final = buscar(esto, esto.innerText, veces)
             console.log(final);
-            
             dado.innerText = '🎲'
             console.log('pasó');
-            
             if (!final) return
             console.log('perfecto');
-            
             llegar(esto, final)
 
+        })
+    }
+    for (const uno of document.getElementsByTagName('th')) {
+        uno.addEventListener('click', (evento : MouseEvent) => {
+            if (uno.id == 'centro') return
+            if (!dado) return
+            if (uno.innerText == '' || dado.innerText == '🎲') return
+            if (dado.innerText != '6️⃣') return
+            let encontrado = document.getElementsByClassName(uno.id)
+            for (const actual of encontrado[Symbol.iterator]()) {
+                if (actual.classList.item(1)?.length == 2 && actual.classList.item(1) != '⏺️') {
+                    // actual.textContent = uno.innerText.substring(0, 2)
+                    // uno.innerText = uno.innerText.slice(2)
+                    llegar(uno, actual)
+                    dado.innerText = '🎲'
+                    break
+                }
+            }
         })
     }
 }

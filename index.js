@@ -155,17 +155,30 @@ function movimiento(celda, lugar) {
     }
 }
 function llegar(inicio, final) {
+    var _a, _b, _c, _d;
     if (!final)
         return;
     if (final.textContent == null)
         final.textContent = '';
-    if (final.tagName == 'TH')
+    if (final.tagName == 'TH' && final.id == 'centro')
         final.textContent += inicio.textContent;
-    else
-        final.textContent = inicio.textContent;
-    inicio.textContent = '';
+    else {
+        if (final.textContent.includes(inicio.textContent) || final.textContent == '') {
+            final.textContent += (_a = inicio.textContent) === null || _a === void 0 ? void 0 : _a.slice(inicio.textContent.length - 2, inicio.textContent.length);
+            inicio.textContent = (_b = inicio.textContent) === null || _b === void 0 ? void 0 : _b.slice(0, inicio.textContent.length - 2);
+        }
+        else if (final.textContent.length == 2 && (final.textContent == '🟥' || final.textContent == '🟦'
+            || final.textContent == '🟨' || final.textContent == '🟩')) {
+            let casilla = document.getElementById(piezas[final.textContent]);
+            if (!casilla)
+                return;
+            casilla.innerText += final.textContent;
+            final.textContent = (_c = inicio.textContent) === null || _c === void 0 ? void 0 : _c.slice(inicio.textContent.length - 2, inicio.textContent.length);
+            inicio.textContent = (_d = inicio.textContent) === null || _d === void 0 ? void 0 : _d.slice(0, inicio.textContent.length - 2);
+        }
+    }
 }
-function buscar(celda, veces) {
+function buscar(celda, color, veces) {
     if (veces == 0) {
         console.log('no lo seeeee');
         console.log(celda);
@@ -179,12 +192,12 @@ function buscar(celda, veces) {
             var actual = movimiento(celda, lugar);
             break;
         case 4:
-            if (lugar.substring(0, 2) != celda.innerText)
+            if (lugar.substring(0, 2) != color)
                 return celda;
             actual = movimiento(celda, lugar.substring(2, 4));
             break;
         case 6:
-            if (lugar.substring(0, 2) == celda.innerText)
+            if (lugar.substring(0, 2) == color)
                 actual = movimiento(celda, lugar.substring(2, 4));
             else
                 actual = movimiento(celda, lugar.substring(4));
@@ -195,7 +208,7 @@ function buscar(celda, veces) {
     }
     if (!actual)
         return celda;
-    return buscar(actual, veces - 1);
+    return buscar(actual, color, veces - 1);
 }
 function lanzar() {
     dado === null || dado === void 0 ? void 0 : dado.addEventListener('click', (evento) => {
@@ -213,7 +226,7 @@ function mover() {
                 return;
             let veces = Number(dado === null || dado === void 0 ? void 0 : dado.innerText.split('')[0]);
             console.log(veces);
-            let final = buscar(esto, veces);
+            let final = buscar(esto, esto.innerText, veces);
             console.log(final);
             dado.innerText = '🎲';
             console.log('pasó');
@@ -221,6 +234,29 @@ function mover() {
                 return;
             console.log('perfecto');
             llegar(esto, final);
+        });
+    }
+    for (const uno of document.getElementsByTagName('th')) {
+        uno.addEventListener('click', (evento) => {
+            var _a;
+            if (uno.id == 'centro')
+                return;
+            if (!dado)
+                return;
+            if (uno.innerText == '' || dado.innerText == '🎲')
+                return;
+            if (dado.innerText != '6️⃣')
+                return;
+            let encontrado = document.getElementsByClassName(uno.id);
+            for (const actual of encontrado[Symbol.iterator]()) {
+                if (((_a = actual.classList.item(1)) === null || _a === void 0 ? void 0 : _a.length) == 2 && actual.classList.item(1) != '⏺️') {
+                    // actual.textContent = uno.innerText.substring(0, 2)
+                    // uno.innerText = uno.innerText.slice(2)
+                    llegar(uno, actual);
+                    dado.innerText = '🎲';
+                    break;
+                }
+            }
         });
     }
 }
