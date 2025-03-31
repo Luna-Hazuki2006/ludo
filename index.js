@@ -155,17 +155,19 @@ function movimiento(celda, lugar) {
     }
 }
 function llegar(inicio, final) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     if (!final)
         return;
     if (final.textContent == null)
         final.textContent = '';
-    if (final.tagName == 'TH' && final.id == 'centro')
+    if (final.tagName == 'TH' && final.id == 'centro') {
         final.textContent += inicio.textContent;
+        inicio.textContent = (_a = inicio.textContent) === null || _a === void 0 ? void 0 : _a.slice(0, inicio.textContent.length - 2);
+    }
     else {
         if (final.textContent.includes(inicio.textContent) || final.textContent == '') {
-            final.textContent += (_a = inicio.textContent) === null || _a === void 0 ? void 0 : _a.slice(inicio.textContent.length - 2, inicio.textContent.length);
-            inicio.textContent = (_b = inicio.textContent) === null || _b === void 0 ? void 0 : _b.slice(0, inicio.textContent.length - 2);
+            final.textContent += (_b = inicio.textContent) === null || _b === void 0 ? void 0 : _b.slice(inicio.textContent.length - 2, inicio.textContent.length);
+            inicio.textContent = (_c = inicio.textContent) === null || _c === void 0 ? void 0 : _c.slice(0, inicio.textContent.length - 2);
         }
         else if (final.textContent.length == 2 && (final.textContent == '🟥' || final.textContent == '🟦'
             || final.textContent == '🟨' || final.textContent == '🟩')) {
@@ -173,8 +175,8 @@ function llegar(inicio, final) {
             if (!casilla)
                 return;
             casilla.innerText += final.textContent;
-            final.textContent = (_c = inicio.textContent) === null || _c === void 0 ? void 0 : _c.slice(inicio.textContent.length - 2, inicio.textContent.length);
-            inicio.textContent = (_d = inicio.textContent) === null || _d === void 0 ? void 0 : _d.slice(0, inicio.textContent.length - 2);
+            final.textContent = (_d = inicio.textContent) === null || _d === void 0 ? void 0 : _d.slice(inicio.textContent.length - 2, inicio.textContent.length);
+            inicio.textContent = (_e = inicio.textContent) === null || _e === void 0 ? void 0 : _e.slice(0, inicio.textContent.length - 2);
         }
     }
 }

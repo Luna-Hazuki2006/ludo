@@ -117,8 +117,10 @@ function movimiento(celda : HTMLTableCellElement, lugar : string) {
 function llegar(inicio : Element, final : Element) {
     if (!final) return
     if (final.textContent == null) final.textContent = ''
-    if (final.tagName == 'TH' && final.id == 'centro') final.textContent += inicio.textContent
-    else {
+    if (final.tagName == 'TH' && final.id == 'centro') {
+        final.textContent += inicio.textContent
+        inicio.textContent = inicio.textContent?.slice(0, inicio.textContent.length - 2) as string
+    } else {
         if (final.textContent.includes(inicio.textContent as string) || final.textContent == '') {
             final.textContent += inicio.textContent?.slice(inicio.textContent.length - 2, inicio.textContent.length)
             inicio.textContent = inicio.textContent?.slice(0, inicio.textContent.length - 2) as string
